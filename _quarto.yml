@@ -1,0 +1,13 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Pattern Recognition 2025-Scientific Blog"
+  navbar:
+    background: "#ff69b4"
+    foreground: "#ffffff"
+
+format:
+  html:
+    toc: false
