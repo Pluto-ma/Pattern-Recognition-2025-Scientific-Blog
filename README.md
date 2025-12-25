@@ -1,0 +1,1 @@
+# Pattern-Recognition-2025-Scientific-Blog
