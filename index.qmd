@@ -75,9 +75,6 @@ $$ {#eq-mahalanobis}
 为了直观理解公式 @eq-mahalanobis 中协方差矩阵 $\Sigma$ 如何影响分布形状，你可以通过下方的滑块调整噪声在 $x, y$ 方向的标准差及相关性。请观察当相关性不为 0 时，分布如何从“正圆”变为倾斜的“椭圆”。
 
 ```{ojs}
-import {Inputs} from "npm:@observablehq/inputs"
-import * as Plot from "npm:@observablehq/plot"
-
 viewof mu = Inputs.range([-5, 5], { value: 0, step: 0.01, label: "μ (mean)" })
 viewof sigma = Inputs.range([0.1, 3], { value: 1, step: 0.01, label: "σ (std dev)" })
 
