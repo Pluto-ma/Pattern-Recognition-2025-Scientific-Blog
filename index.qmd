@@ -75,35 +75,34 @@ $$ {#eq-mahalanobis}
 为了直观理解公式 @eq-mahalanobis 中协方差矩阵 $\Sigma$ 如何影响分布形状，你可以通过下方的滑块调整噪声在 $x, y$ 方向的标准差及相关性。请观察当相关性不为 0 时，分布如何从“正圆”变为倾斜的“椭圆”。
 
 ```{ojs}
-// 定义滑块输入
-viewof sigmaX = Inputs.range([0.1, 5], {value: 1, step: 0.1, label: "X轴标准差 (sigma_x)"})
-viewof sigmaY = Inputs.range([0.1, 5], {value: 1, step: 0.1, label: "Y轴标准差 (sigma_y)"})
-viewof correlation = Inputs.range([-0.9, 0.9], {value: 0, step: 0.1, label: "相关性 (rho)"})
+import {Inputs} from "npm:@observablehq/inputs"
+import * as Plot from "npm:@observablehq/plot"
 
-// 绘制图形
-Plot.plot({
-  grid: true,
-  aspectRatio: 1,
-  x: {domain: [-6, 6], label: "误差维度 1"},
-  y: {domain: [-6, 6], label: "误差维度 2"},
-  marks: [
-    // 随机生成 1000 个点模拟高斯噪声分布
-    Plot.dot(
-      d3.range(1000).map(() => {
-        // Box-Muller 变换生成标准正态分布
-        const u = Math.random(), v = Math.random();
-        const mag = Math.sqrt(-2 * Math.log(u));
-        const z0 = mag * Math.cos(2 * Math.PI * v);
-        const z1 = mag * Math.sin(2 * Math.PI * v);
-        
-        // 应用协方差变换
-        const x = sigmaX * z0;
-        const y = sigmaY * (correlation * z0 + Math.sqrt(1 - correlation**2) * z1);
-        return {x, y};
-      }), 
-      {x: "x", y: "y", fill: "#4a86e8", opacity: 0.4, r: 2}
-    ),
-    Plot.ruleX([0]),
-    Plot.ruleY([0])
-  ]
+viewof mu = Inputs.range([-5, 5], { value: 0, step: 0.01, label: "μ (mean)" })
+viewof sigma = Inputs.range([0.1, 3], { value: 1, step: 0.01, label: "σ (std dev)" })
+
+const variance = sigma * sigma
+md`当前参数： μ=${mu.toFixed(2)}，σ=${sigma.toFixed(2)}，σ²=${variance.toFixed(2)}`
+
+const xMin = -10
+const xMax = 10
+
+const data = Array.from({ length: 800 }, (_, i) => {
+const x = xMin + (xMax - xMin) * (i / 799)
+const z = (x - mu) / sigma
+const y = Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI))
+return { x, y }
 })
+
+Plot.plot({
+width: 720,
+height: 360,
+grid: true,
+x: { label: "x", domain: [xMin, xMax] },
+y: { label: "p(x)" },
+marks: [Plot.line(data, { x: "x", y: "y" })]
+})
+```
+
+
+
