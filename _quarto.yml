@@ -14,8 +14,6 @@ format:
     self-contained: true
     code-tools: true
     code-fold: true
-    code-summary: "展开代码"
-    code-overflow: wrap
 
 execute:
   freeze: auto
