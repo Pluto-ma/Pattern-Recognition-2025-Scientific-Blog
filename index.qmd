@@ -10,6 +10,36 @@ format:
     theme: cosmo
 ---
 
+<style>
+  /* 1. 全局段落缩进 2 字符，并设置两端对齐 */
+  p {
+    text-indent: 2em;
+    text-align: justify;
+  }
+
+  /* 2. 排除不需要缩进的区域 */
+  
+  /* 提示框 (Callout) 内部通常不缩进，保持对齐更美观 */
+  .callout p {
+    text-indent: 0;
+  }
+  
+  /* 列表项内部的段落不缩进 */
+  li p {
+    text-indent: 0;
+  }
+
+  /* 交互式图表 (Observable) 产生的文本不缩进，以免破坏 UI 布局 */
+  .observablehq p {
+    text-indent: 0;
+  }
+  
+  /* 图片和表格的标题不缩进 */
+  figure caption, .figure-caption {
+    text-indent: 0;
+  }
+</style>
+
 ::: {.callout-note appearance="simple"}
 **课程作业信息**
 
@@ -54,7 +84,6 @@ $$ {#eq-gaussian-noise}
 
 其中协方差矩阵 $\sigma^2 I$ 同时隐含了两个重要假设：其一，不同维度（如像素或采样点）之间的噪声相互独立；其二，噪声在所有方向上的强度相同，即各向同性。需要注意的是，独立性与各向同性是两个不同的概念：噪声可以在各维度之间相互独立但呈现各向异性（协方差矩阵为对角但对角元素不全相等），也可以表现出维度间的相关性（协方差矩阵具有非零的非对角元素）。这些假设将直接影响似然函数的几何结构。
 
-
 ```{ojs}
 viewof mu = Inputs.range([-5, 5], { value: 0, step: 0.01, label: "μ (mean)" })
 viewof sigma = Inputs.range([0.1, 3], { value: 1, step: 0.01, label: "σ (std dev)" })
@@ -86,25 +115,3 @@ md`当前参数: μ=${mu.toFixed(2)}, σ=${sigma.toFixed(2)}, σ²=${(sigma * si
     ]
   })
 }
-```
-
-一旦噪声模型被确定，似然函数的形式也随之明确。对于高斯噪声情形，似然可写为：
-
-$$
-p(y\mid x) = \mathcal{N}\big(A(x),\Sigma\big),
-$$ {#eq-gaussian-likelihood}
-
-其负对数形式（忽略常数项）等价于：
-
-$$
-(y-A(x))^\top \Sigma^{-1}(y-A(x)).
-$$ {#eq-mahalanobis}
-
-这表明，噪声协方差矩阵 $\Sigma$ 决定了误差在不同方向上的度量方式：当 $\Sigma=\sigma^2 I$ 时，该度量退化为熟悉的欧式距离；而当噪声存在相关性或各向异性时，误差的等高线从“圆形”变为“椭圆形”，从而改变后验分布的形状。由此可以看出，噪声模型并非建模中的次要细节，而是通过似然函数直接塑造了逆问题的后验结构。
-
----
-
-
-
-
-
