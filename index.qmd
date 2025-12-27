@@ -8,10 +8,24 @@ title: ""
 - 姓名：马忠慧
 
 ---
+---
+title: "我的交互式博客"
+format: html
+---
+
+## 交互式正弦波
+
+试试拖动下面的滑块！
+
+```{ojs}
+//| panel: sidebar
+viewof frequency = Inputs.range([0, 10], {value: 1, step: 0.1, label: "频率 (Frequency)"})
+viewof phase = Inputs.range([0, 2 * Math.PI], {value: 0, step: 0.1, label: "相位 (Phase)"})
 
 ## 第一节：数学建模（从正问题到贝叶斯逆问题）
 
 在生物医学图像处理与成像领域中，我们通常将“物理世界到信号的映射”称为正问题（forward problem），而将“由信号反推物理世界”的过程称为逆问题（inverse problem）。在数学建模中，物理世界中真实但不可直接观测的结构记为 \(x\)，通过成像系统获得的测量信号或图像记为 \(y\)。二者之间的关系可以用一个最直观的箭头示意来描述：从 \(x\) 指向 \(y\) 的过程对应正问题，而从 \(y\) 指回 \(x\) 的过程对应逆问题，
+
 \[
 x \xrightarrow[\text{正问题}]{} y,\qquad
 y \xrightarrow[\text{逆问题}]{} x
