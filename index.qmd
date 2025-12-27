@@ -8,7 +8,6 @@ format:
     toc: true
     code-tools: true
     theme: cosmo
-    mainfont: "Microsoft YaHei" # 确保中文显示正常，可选
 ---
 
 ::: {.callout-note appearance="simple"}
@@ -68,3 +67,43 @@ $$
 $$ {#eq-mahalanobis}
 
 这表明，噪声协方差矩阵 $\Sigma$ 决定了误差在不同方向上的度量方式：当 $\Sigma=\sigma^2 I$ 时，该度量退化为熟悉的欧式距离；而当噪声存在相关性或各向异性时，误差的等高线从“圆形”变为“椭圆形”，从而改变后验分布的形状。由此可以看出，噪声模型并非建模中的次要细节，而是通过似然函数直接塑造了逆问题的后验结构。
+
+---
+
+### 交互演示：噪声协方差与几何形状
+
+为了直观理解公式 @eq-mahalanobis 中协方差矩阵 $\Sigma$ 如何影响分布形状，你可以通过下方的滑块调整噪声在 $x, y$ 方向的标准差及相关性。请观察当相关性不为 0 时，分布如何从“正圆”变为倾斜的“椭圆”。
+
+```{ojs}
+// 定义滑块输入
+viewof sigmaX = Inputs.range([0.1, 5], {value: 1, step: 0.1, label: "X轴标准差 (sigma_x)"})
+viewof sigmaY = Inputs.range([0.1, 5], {value: 1, step: 0.1, label: "Y轴标准差 (sigma_y)"})
+viewof correlation = Inputs.range([-0.9, 0.9], {value: 0, step: 0.1, label: "相关性 (rho)"})
+
+// 绘制图形
+Plot.plot({
+  grid: true,
+  aspectRatio: 1,
+  x: {domain: [-6, 6], label: "误差维度 1"},
+  y: {domain: [-6, 6], label: "误差维度 2"},
+  marks: [
+    // 随机生成 1000 个点模拟高斯噪声分布
+    Plot.dot(
+      d3.range(1000).map(() => {
+        // Box-Muller 变换生成标准正态分布
+        const u = Math.random(), v = Math.random();
+        const mag = Math.sqrt(-2 * Math.log(u));
+        const z0 = mag * Math.cos(2 * Math.PI * v);
+        const z1 = mag * Math.sin(2 * Math.PI * v);
+        
+        // 应用协方差变换
+        const x = sigmaX * z0;
+        const y = sigmaY * (correlation * z0 + Math.sqrt(1 - correlation**2) * z1);
+        return {x, y};
+      }), 
+      {x: "x", y: "y", fill: "#4a86e8", opacity: 0.4, r: 2}
+    ),
+    Plot.ruleX([0]),
+    Plot.ruleY([0])
+  ]
+})
