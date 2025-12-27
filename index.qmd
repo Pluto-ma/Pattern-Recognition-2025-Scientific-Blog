@@ -155,54 +155,57 @@ $$
 
 
 ```{ojs}
-viewof n_2d = Inputs.range([64, 512], { value: 256, step: 64, label: "n×n" })
-viewof mu_2d = Inputs.range([-2, 2], { value: 0, step: 0.01, label: "μ (mean)" })
-viewof sigma_2d = Inputs.range([0.1, 2.5], { value: 1, step: 0.01, label: "σ (std dev)" })
-viewof clip_2d = Inputs.range([1, 6], { value: 3, step: 0.1, label: "Display clip ±(clip·σ)" })
-viewof seed_2d = Inputs.range([0, 9999], { value: 0, step: 1, label: "Seed" })
-viewof regen_2d = Inputs.button("Regenerate")
 
-md`n=${n_2d}, μ=${mu_2d.toFixed(2)}, σ=${sigma_2d.toFixed(2)}`
+viewof n_abs = Inputs.range([64, 512], { value: 256, step: 64, label: "分辨率 (n×n)" })
+viewof sigma_abs = Inputs.range([0.1, 5], { value: 1, step: 0.1, label: "噪声强度 σ (标准差)" })
+
+md`当前分辨率: ${n_abs}×${n_abs}, 噪声强度: ${sigma_abs.toFixed(1)}`
 
 {
-  // 定义核心绘图函数
-  const makeNoiseCanvas = (n, mu, sigma, clip, seed) => {
+  const makeNoiseCanvas = (n, sigma) => {
+    // --- 内部固定参数 ---
+    const mu = 0;          // 均值固定为 0
+    const seed = 1234;     // 种子固定，保证图案纹理不变，只变对比度
+    const fixed_clip = 3;  // 固定截断范围（基准），不再随 sigma 变化！
     
-    // 伪随机数生成器 (Mulberry32)
+    // 伪随机数生成器
     const prng = (s) => () => {
       s |= 0; s = (s + 0x6D2B79F5) | 0;
-      let t = Math.imul(s ^ (s >>> 15), 1 | s); // 【修复】添加 let
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     }
     
     const rand = prng(seed)
     
-    // Box-Muller 变换生成正态分布随机数
+    // Box-Muller 生成正态分布
     const randn = () => {
-      let u = rand(); // 【修复】添加 let
-      let v = rand(); // 【修复】添加 let
+      let u = rand();
+      let v = rand();
       u = Math.max(u, 1e-12);
       return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
     }
 
-    // 创建 Canvas
-    const c = document.createElement("canvas"); // 【修复】添加 const
+    const c = document.createElement("canvas");
     c.width = n; 
     c.height = n;
     const ctx = c.getContext("2d", { willReadFrequently: true });
     const img = ctx.createImageData(n, n);
     const data = img.data;
 
-    const denom = clip * sigma;
+    // 【核心修改】绝对显示模式
+    // 分母固定为 fixed_clip (比如 3)，不再乘以 sigma。
+    // 这样当 sigma 增大时，(val - mu) 变大，归一化后的结果就会更宽，对比度更高。
+    const denom = fixed_clip * 1.0; 
     
-    // 填充像素
-    let i = 0; // 【修复】添加 let
-    for (let p = 0; p < n * n; p++) { // 【修复】添加 let
-      let val = mu + sigma * randn(); // 【修复】添加 let
+    let i = 0;
+    for (let p = 0; p < n * n; p++) {
+      let val = mu + sigma * randn(); // 生成噪声
       
-      // 归一化并映射到 [0, 255]
-      let g = 128 + (val - mu) / denom * 128; // 【修复】添加 let
+      // 归一化显示
+      let g = 128 + (val - mu) / denom * 128;
+      
+      // 限制在 0-255 之间
       g = Math.max(0, Math.min(255, Math.round(g)));
       
       data[i++] = g; // R
@@ -213,19 +216,15 @@ md`n=${n_2d}, μ=${mu_2d.toFixed(2)}, σ=${sigma_2d.toFixed(2)}`
     
     ctx.putImageData(img, 0, 0);
     
-    // 样式调整
     c.style.width = "320px";
     c.style.height = "320px";
     c.style.border = "1px solid #ddd";
-    c.style.imageRendering = "pixelated"; // 让像素点更清晰
+    c.style.imageRendering = "pixelated";
     
     return c;
   }
 
-  // 调用函数并显示
-  // regen_2d 只是为了触发刷新，不需要传入函数
-  regen_2d; 
-  return makeNoiseCanvas(n_2d, mu_2d, sigma_2d, clip_2d, seed_2d);
+  return makeNoiseCanvas(n_abs, sigma_abs);
 }
 
 ```
