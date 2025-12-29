@@ -1,51 +1,153 @@
 ---
-title: "基于 DDRM 的图像重建：谱空间视角下的贝叶斯逆问题"
+title: "基于 DDRM 的图像重建"
+subtitle: "谱空间视角下的贝叶斯逆问题初探"
 author: "马忠慧 (学号：25113060024)"
 date: last-modified
 format:
   html:
-    number-sections: true
-    toc: true
-    code-tools: true
     theme: cosmo
+    toc: true
+    toc-title: "目录"
+    number-sections: true
+    code-tools: true
+    title-block-banner: true
+    smooth-scroll: true
 ---
 
+<!-- ==================== 样式自定义区域 (马卡龙限定版) ==================== -->
 <style>
-  /* 1. 全局段落缩进 2 字符，并设置两端对齐 */
+  /* 1. 定义马卡龙色板 */
+  :root {
+    --mac-pink: #FFDAC1;   /* 蜜桃粉 */
+    --mac-green: #E2F0CB;  /* 薄荷绿 */
+    --mac-blue: #B5EAD7;   /* 冰河蓝 */
+    --mac-purple: #C7CEEA; /* 香芋紫 */
+    --mac-yellow: #FFFFD1; /* 柠檬黄 */
+    --text-dark: #555555;
+  }
+
+  /* 2. 全局字体与排版优化 */
+  body {
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--text-dark);
+    background-color: #FAFAFA; /* 极淡的灰白背景 */
+  }
+
+  /* 标题美化：左侧加一个小竖条，颜色轮换 */
+  h2 {
+    border-left: 6px solid var(--mac-blue);
+    padding-left: 12px;
+    color: #444;
+    margin-top: 2em;
+  }
+  h3 {
+    border-left: 4px solid var(--mac-purple);
+    padding-left: 10px;
+    color: #666;
+  }
+
+  /* 3. 正文缩进 (保留你的要求) */
   p {
     text-indent: 2em;
     text-align: justify;
+    line-height: 1.8;
   }
-
-  /* 2. 排除不需要缩进的区域 */
-  
-  /* 提示框 (Callout) 内部通常不缩进，保持对齐更美观 */
-  .callout p {
-    text-indent: 0;
-  }
-  
-  /* 列表项内部的段落不缩进 */
-  li p {
+  /* 排除不需要缩进的区域 */
+  .callout p, li p, .observablehq p, figure caption, .figure-caption, .mercy-note p {
     text-indent: 0;
   }
 
-  /* 交互式图表 (Observable) 产生的文本不缩进，以免破坏 UI 布局 */
-  .observablehq p {
-    text-indent: 0;
+  /* 4. Callout (提示框) 马卡龙化 */
+  div.callout-note.callout {
+    border-left-color: var(--mac-blue) !important;
+    background-color: rgba(181, 234, 215, 0.2) !important;
+    border-radius: 10px;
+  }
+  div.callout-important.callout {
+    border-left-color: var(--mac-pink) !important;
+    background-color: rgba(255, 218, 193, 0.2) !important;
+    border-radius: 10px;
+  }
+  div.callout-tip.callout {
+    border-left-color: var(--mac-green) !important;
+    background-color: rgba(226, 240, 203, 0.2) !important;
+    border-radius: 10px;
+  }
+
+  /* 5. 个人信息卡片优化 */
+  .student-card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 10px rgba(181, 234, 215, 0.3); /* 蓝色阴影 */
+    border: 2px solid var(--mac-blue);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .student-icon {
+    font-size: 2em;
+    background: var(--mac-blue);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  /* 6. "求放过" 专属样式 */
+  .mercy-note {
+    background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+    border: 2px dashed var(--mac-pink);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    position: relative;
+    box-shadow: 5px 5px 0px var(--mac-pink); /* 可爱的偏移阴影 */
+    transition: transform 0.2s;
+  }
+  .mercy-note:hover {
+    transform: translateY(-2px);
+  }
+  .mercy-title {
+    font-weight: bold;
+    color: #E08E79;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    display: block; /* 确保换行 */
   }
   
-  /* 图片和表格的标题不缩进 */
-  figure caption, .figure-caption {
-    text-indent: 0;
+  /* 标题栏背景优化 (覆盖默认 theme) */
+  .quarto-title-banner {
+    background: linear-gradient(to right, #C7CEEA, #B5EAD7) !important;
+    color: #555 !important;
   }
 </style>
 
-::: {.callout-note appearance="simple"}
-**课程作业信息**
+<!-- ==================== 页面内容开始 ==================== -->
 
-- **学号**：25113060024
-- **姓名**：马忠慧
-:::
+<!-- 1. 个人信息卡片 -->
+<div class="student-card">
+  <div class="student-icon">🎓</div>
+  <div>
+    <div style="font-weight: bold; font-size: 1.1em;">课程作业提交</div>
+    <div style="color: #666;">学号：25113060024 &nbsp;|&nbsp; 姓名：马忠慧</div>
+  </div>
+</div>
+
+<!-- 2. 致老师的“求生欲”便签 -->
+<div class="mercy-note">
+  <span class="mercy-title">✨ 写在前面的一点碎碎念：</span>
+  <p style="text-indent: 0;">
+    李老师好！(＞人＜;) <br>
+    虽然我的主修方向不是深度学习，但在这次作业中我已经用尽洪荒之力去理解数学原理和调试代码啦。头发真的掉了好几根... 
+    <br><br>
+    如果文档中还有理解不到位的地方，<strong>Ball ball 老师手下留情！</strong>（内容我可以随时再改！）希望这份基于谱空间视角的报告能让您看到我的努力~ 💖
+  </p>
+</div>
 
 
 ## 引言
