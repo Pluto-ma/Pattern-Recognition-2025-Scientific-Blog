@@ -47,7 +47,7 @@ format:
 - **姓名**：马忠慧
 :::
 
-## 数学建模（从正问题到贝叶斯逆问题）
+## 从正问题到贝叶斯逆问题
 
 在生物医学图像处理与成像领域中，我们通常将“物理世界到信号的映射”称为正问题，而将“由信号反推物理世界”的过程称为逆问题，将物理世界中真实但不可直接观测的结构记为 $x$，通过成像系统获得的测量信号或图像记为 $y$。二者之间的关系可以用一个最直观的箭头示意来描述：从 $x$ 指向 $y$ 的过程对应正问题，而从 $y$ 指回 $x$ 的过程对应逆问题：
 
@@ -224,20 +224,13 @@ $$
 * 第二项 $-\frac{1}{2\sigma_y^2} \|y - Ax\|^2$ 推动解符合观测数据（保真度）。
 * 系数 $\frac{1}{2\sigma_y^2}$ 起到了拉格朗日乘子的作用，平衡这两股力量。
 
-**DDRM 的核心任务**: DDRM 的目标是从这个复杂的后验分布 $p(x | y)$ 中进行采样。传统的马尔可夫链蒙特卡洛（MCMC）方法在高维空间效率极低，而扩散模型提供了一种高效的采样路径。
 
----
+## 谱空间变换
 
-## 4. 谱空间变换：DDRM 的数学核心
-
-DDRM 区别于其他基于扩散的逆问题求解器（如 DPS, ILVR）的关键在于其**谱空间处理**。这种处理方式源于对观测方程 $\mathbf{y} = \mathbf{H}\mathbf{x} + \mathbf{z}$ 的深入代数分析。
-
-### 4.1 奇异值分解 (SVD) 的引入
-
-对于任意实矩阵 $\mathbf{H} \in \mathbb{R}^{m \times n}$，存在奇异值分解：
+DDRM 区别于其他基于扩散的逆问题求解器的关键在于其**谱空间处理**。这种处理方式源于对观测方程 $\mathbf{y} = \mathbf{A}\mathbf{x} + \mathbf{z}$ 的深入代数分析。对于任意实矩阵 $\mathbf{A} \in \mathbb{R}^{m \times n}$，存在奇异值分解：
 
 $$
-\mathbf{H} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^\top
+\mathbf{A} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^\top
 $$ {#eq-svd}
 
 其中：
@@ -246,9 +239,7 @@ $$ {#eq-svd}
 * $\mathbf{V} \in \mathbb{R}^{n \times n}$ 是正交矩阵，满足 $\mathbf{V}^\top \mathbf{V} = \mathbf{I}_n$。
 * $\mathbf{\Sigma} \in \mathbb{R}^{m \times n}$ 是矩形对角矩阵，其对角线元素 $s_i = \mathbf{\Sigma}_{ii} \ge 0$ 为奇异值。
 
-### 4.2 坐标变换与解耦
-
-我们定义 **谱空间 (Spectral Space)** 中的变量为原空间变量在奇异向量基下的投影。定义变换后的变量：
+定义 **谱空间 (Spectral Space)** 中的变量为原空间变量在奇异向量基下的投影。定义变换后的变量：
 
 $$
 \begin{aligned}
@@ -260,7 +251,7 @@ $$ {#eq-spectral-vars}
 
 由于 $\mathbf{U}$ 是正交矩阵，线性变换 $\bar{\mathbf{z}} = \mathbf{U}^\top \mathbf{z}$ 保持了高斯噪声的统计特性（旋转不变性），即 $\bar{\mathbf{z}} \sim \mathcal{N}(\mathbf{0}, \sigma_y^2 \mathbf{I})$。
 
-将 SVD 公式 @eq-svd 代入观测方程 $\mathbf{y} = \mathbf{U}\mathbf{\Sigma}\mathbf{V}^\top \mathbf{x} + \mathbf{z}$ 并左乘 $\mathbf{U}^\top$，我们得到：
+将 SVD 公式代入观测方程 $\mathbf{y} = \mathbf{U}\mathbf{\Sigma}\mathbf{V}^\top \mathbf{x} + \mathbf{z}$ 并左乘 $\mathbf{U}^\top$，我们得到：
 
 $$
 \mathbf{U}^\top \mathbf{y} = \mathbf{U}^\top \mathbf{U} \mathbf{\Sigma} \mathbf{V}^\top \mathbf{x} + \mathbf{U}^\top \mathbf{z} \implies \bar{\mathbf{y}} = \mathbf{\Sigma} \bar{\mathbf{x}} + \bar{\mathbf{z}}
@@ -272,16 +263,12 @@ $$
 \bar{y}_i = s_i \bar{x}_i + \bar{z}_i
 $$ {#eq-scalar-decoupling}
 
-这表明，在谱空间中，复杂的逆问题被解耦为 $n$ 个独立的一维问题（对于 $i > m$ 的分量，没有观测值，等价于 $s_i = 0$）。
+这表明，在谱空间中，复杂的逆问题被解耦为 $n$ 个独立的一维问题（对于 $i > m$ 的分量，没有观测值，等价于 $s_i = 0$）,这样就实现了解耦，使得DDRM 在反向扩散的每一步同时施加先验去噪与逐维数据一致性修正，使生成过程稳定地向满足观测的后验解收敛。根据奇异值 $s_i$ 的大小，谱空间中的每个模态 (Eigenmode) 可以分为两类。你可以通过下方的交互图来体会 $s_i$ 对观测信息的影响。
 
-### 4.3 奇异值的分类讨论
-
-根据奇异值 $s_i$ 的大小，谱空间中的每个模态 (Eigenmode) 可以分为两类。你可以通过下方的交互图来体会 $s_i$ 对观测信息的影响。
-
-1.  **零空间/缺失模态 ($s_i = 0$)**：
+**零空间/缺失模态 ($s_i = 0$)**：
     此时方程变为 $\bar{y}_i = \bar{z}_i$（如果 $i \le m$）或无方程（如果 $i > m$）。这意味着观测数据 $\mathbf{y}$ 不包含任何关于 $\bar{x}_i$ 的信息。恢复 $\bar{x}_i$ 完全依赖于先验知识（扩散模型）。这对应于图像修复中的缺失区域或超分辨率中丢失的高频分量。
 
-2.  **观测模态 ($s_i > 0$)**：
+ **观测模态 ($s_i > 0$)**：
     此时 $\bar{y}_i$ 提供了关于 $\bar{x}_i$ 的有噪测量：$\bar{y}_i \sim \mathcal{N}(s_i \bar{x}_i, \sigma_y^2)$。我们可以从中提取出关于 $\bar{x}_i$ 的似然信息。然而，不同 $s_i$ 对应的信噪比不同。当 $s_i$ 很小时，观测值中的信号极其微弱，噪声占主导；当 $s_i$ 很大时，观测值非常可靠。
 
 
