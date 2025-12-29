@@ -285,31 +285,42 @@ $$ {#eq-scalar-decoupling}
 
 实验首先选取一张自然图像作为真实图像（ground truth）。该图像在重建过程中对算法是不可见的，仅用于后续的定量和定性评估。随后，对原始图像施加随机像素遮挡，并叠加高斯噪声，得到观测图像（measurement）。这一过程模拟了成像中常见的信息缺失与噪声干扰问题。
 
-![Measurement](figures/measurement.png)
-![Ground truth](figures/ground_truth.png)
-
 ### 单次 DDRM 重建结果
 
-在得到观测数据后，首先运行一次 DDRM 扩散反推过程，从后验分布中采样得到一张重建结果。该过程从随机噪声初始化开始，通过多步去噪逐渐恢复图像结构，同时在每一步中强制满足观测一致性约束。作为对照，还计算了简单的线性逆（算子伴随）结果，用于体现扩散模型先验带来的提升。
+在得到观测数据后，首先运行一次 DDRM 扩散反推过程，从后验分布中采样得到一张重建结果。该过程从随机噪声初始化开始，通过多步去噪逐渐恢复图像结构，同时在每一步中强制满足观测一致性约束。作为对照，还计算了简单的线性逆（算子伴随）结果，用于体现扩散模型先验带来的提升。该结果可以视为从后验分布中采样得到的一个可能解，其视觉质量和 PSNR 均明显优于线性重建。
 
-![DDRM reconstruction](figures/ddrm_reconstruction.png)
+<p align="center">
+  <img src="figures/measurement.png" width="33%" />
+  <img src="figures/ground_truth.png" width="33%" />
+  <img src="figures/ddrm_reconstruction.png" width="33%" />
+</p>
 
-该结果可以视为从后验分布中采样得到的一个可能解，其视觉质量和 PSNR 均明显优于线性重建。
+<p align="center">
+  (a) Measurement&nbsp;&nbsp;&nbsp;
+  (b) Ground truth&nbsp;&nbsp;&nbsp;
+  (c) DDRM reconstruction
+</p>
+
 
 ### 后验均值与不确定性分析
 
-由于 DDRM 是一个概率模型，同一观测条件下并不存在唯一的确定解。为此，我们进一步采用 Monte Carlo 方式多次运行扩散反推过程，从而估计后验分布的统计量。通过对多次重建结果求平均，得到后验均值，它通常比单次采样结果更加稳定。同时，通过计算逐像素的标准差，可以获得后验不确定性，用于反映模型在不同空间位置的置信程度。
-
-![Posterior mean](figures/posterior_mean.png)
-![Posterior standard deviation](figures/posterior_std.png)
-
-可以观察到，不确定性通常集中在被遮挡严重或纹理复杂的区域，而在结构清晰、观测约束较强的位置则明显较低。
+由于 DDRM 是一个概率模型，同一观测条件下并不存在唯一的确定解。为此，我们进一步采用 Monte Carlo 方式多次运行扩散反推过程，从而估计后验分布的统计量。通过对多次重建结果求平均，得到后验均值，它通常比单次采样结果更加稳定。同时，通过计算逐像素的标准差，可以获得后验不确定性，用于反映模型在不同空间位置的置信程度。可以观察到，不确定性通常集中在被遮挡严重或纹理复杂的区域，而在结构清晰、观测约束较强的位置则明显较低。
 
 ### 重建误差分析
 
 在实验中，由于真实图像是已知的，还可以计算后验均值与 ground truth 之间的绝对误差图，用于定量分析重建性能。需要注意的是，该误差图仅用于实验评估，在真实应用场景中通常无法获得。
 
-![Absolute error](figures/absolute_error.png)
+<p align="center">
+  <img src="figures/posterior_mean.png" width="33%" />
+  <img src="figures/posterior_std.png" width="33%" />
+  <img src="figures/absolute_error.png" width="33%" />
+</p>
+<p align="center">
+  (d) Posterior mean&nbsp;&nbsp;&nbsp;
+  (e) Posterior std&nbsp;&nbsp;&nbsp;
+  (f) Absolute error
+</p>
+
 
 ##总结
 
