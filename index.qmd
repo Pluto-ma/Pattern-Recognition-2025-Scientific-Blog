@@ -277,6 +277,49 @@ $$ {#eq-scalar-decoupling}
     此时 $\bar{y}_i$ 提供了关于 $\bar{x}_i$ 的有噪测量：$\bar{y}_i \sim \mathcal{N}(s_i \bar{x}_i, \sigma_y^2)$。我们可以从中提取出关于 $\bar{x}_i$ 的似然信息。然而，不同 $s_i$ 对应的信噪比不同。当 $s_i$ 很小时，观测值中的信号极其微弱，噪声占主导；当 $s_i$ 很大时，观测值非常可靠。
 ---
 
+## DDRM图像重建的小案例
+
+本文以一个简单的复旦大学校徽的图像修补示例，介绍如何使用 **DDRM** 从不完整、含噪的观测数据中重建图像，并同时获得结果的不确定性信息。DDRM 的核心思想并不是学习一个从退化图像到清晰图像的黑箱映射，而是将已知的物理退化模型与神经网络学到的数据先验结合，在概率框架下求解成像逆问题。
+
+### Ground Truth Image
+
+首先选取一张自然图像作为真实图像（ground truth）。这张图像在算法运行过程中是不可见的，仅用于后续评估重建结果的质量。
+
+![Ground truth image](figures/ground_truth.png)
+
+### Measurement Model
+
+随后构造一个已知的退化过程，这里采用的是随机遮挡像素的 inpainting 操作，并在观测结果中加入已知强度的高斯噪声。通过这一过程得到的 measurement 模拟了真实成像中信息缺失和噪声污染的情况，也是 DDRM 需要恢复的输入。
+
+![Measurement image](figures/measurement.png)
+
+### Denoising Network as Prior
+
+在重建过程中，DDRM 使用的是一个预训练好的去噪神经网络，而不是针对具体任务重新训练的恢复网络。该神经网络通常采用 U-Net 结构，仅学习“带噪图像如何变得更像真实图像”，并不包含任何关于遮挡规则或成像算子的知识。因此，它在 DDRM 中扮演的角色是数据先验，用来约束重建结果的整体结构和统计特性，而不是直接完成图像修补。
+
+![Denoiser network illustration](figures/denoiser.png)
+
+### Diffusion-based Reconstruction
+
+DDRM 的重建过程是一个逐步反推的扩散采样过程。算法从一张纯随机噪声图像开始，在每一个时间步中，先利用去噪神经网络减少当前图像中的噪声，使其更接近真实图像分布，然后再结合已知的退化模型，对与观测相关的像素施加一致性约束。随着时间步的推进，噪声水平逐渐降低，图像结构逐步显现。需要强调的是，这里的“逐步”指的是时间维度上的迭代，每一步都会同时更新整幅图像的所有像素，而不是逐像素计算。
+
+![DDRM reconstruction](figures/ddrm_reconstruction.png)
+
+### Posterior Mean and Uncertainty
+
+由于 DDRM 是基于概率建模的方法，同一组观测可以通过不同的随机初始噪声生成多种合理的重建结果。通过多次运行扩散反推过程，可以计算得到后验均值（posterior mean），作为更稳定的最终重建结果；同时还可以估计后验标准差（posterior std），用来刻画模型在不同空间位置的不确定性。与真实图像之间的绝对误差则用于定量评估重建精度，但在实际应用中通常不可获得。
+
+![Posterior mean](figures/posterior_mean.png)
+
+![Posterior standard deviation](figures/posterior_std.png)
+
+![Absolute error](figures/absolute_error.png)
+
+### Summary
+
+总体而言，DDRM 通过将神经网络提供的图像先验与显式的物理退化模型相结合，实现了对逆问题的概率求解。这种方法不仅能够给出高质量的重建结果，还能提供空间分布上的不确定性信息，为医学成像、超声和光声等对可靠性要求较高的应用场景提供了重要优势。
+
+
 
 
 
