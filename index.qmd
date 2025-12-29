@@ -226,4 +226,66 @@ $$
 
 **DDRM 的核心任务**: DDRM 的目标是从这个复杂的后验分布 $p(x | y)$ 中进行采样。传统的马尔可夫链蒙特卡洛（MCMC）方法在高维空间效率极低，而扩散模型提供了一种高效的采样路径。
 
+---
+
+## 4. 谱空间变换：DDRM 的数学核心
+
+DDRM 区别于其他基于扩散的逆问题求解器（如 DPS, ILVR）的关键在于其**谱空间处理**。这种处理方式源于对观测方程 $\mathbf{y} = \mathbf{H}\mathbf{x} + \mathbf{z}$ 的深入代数分析。
+
+### 4.1 奇异值分解 (SVD) 的引入
+
+对于任意实矩阵 $\mathbf{H} \in \mathbb{R}^{m \times n}$，存在奇异值分解：
+
+$$
+\mathbf{H} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^\top
+$$ {#eq-svd}
+
+其中：
+
+* $\mathbf{U} \in \mathbb{R}^{m \times m}$ 是正交矩阵，满足 $\mathbf{U}^\top \mathbf{U} = \mathbf{I}_m$。
+* $\mathbf{V} \in \mathbb{R}^{n \times n}$ 是正交矩阵，满足 $\mathbf{V}^\top \mathbf{V} = \mathbf{I}_n$。
+* $\mathbf{\Sigma} \in \mathbb{R}^{m \times n}$ 是矩形对角矩阵，其对角线元素 $s_i = \mathbf{\Sigma}_{ii} \ge 0$ 为奇异值。
+
+### 4.2 坐标变换与解耦
+
+我们定义 **谱空间 (Spectral Space)** 中的变量为原空间变量在奇异向量基下的投影。定义变换后的变量：
+
+$$
+\begin{aligned}
+\bar{\mathbf{x}} &= \mathbf{V}^\top \mathbf{x} \in \mathbb{R}^n \\
+\bar{\mathbf{y}} &= \mathbf{U}^\top \mathbf{y} \in \mathbb{R}^m \\
+\bar{\mathbf{z}} &= \mathbf{U}^\top \mathbf{z} \in \mathbb{R}^m
+\end{aligned}
+$$ {#eq-spectral-vars}
+
+由于 $\mathbf{U}$ 是正交矩阵，线性变换 $\bar{\mathbf{z}} = \mathbf{U}^\top \mathbf{z}$ 保持了高斯噪声的统计特性（旋转不变性），即 $\bar{\mathbf{z}} \sim \mathcal{N}(\mathbf{0}, \sigma_y^2 \mathbf{I})$。
+
+将 SVD 公式 @eq-svd 代入观测方程 $\mathbf{y} = \mathbf{U}\mathbf{\Sigma}\mathbf{V}^\top \mathbf{x} + \mathbf{z}$ 并左乘 $\mathbf{U}^\top$，我们得到：
+
+$$
+\mathbf{U}^\top \mathbf{y} = \mathbf{U}^\top \mathbf{U} \mathbf{\Sigma} \mathbf{V}^\top \mathbf{x} + \mathbf{U}^\top \mathbf{z} \implies \bar{\mathbf{y}} = \mathbf{\Sigma} \bar{\mathbf{x}} + \bar{\mathbf{z}}
+$$
+
+这一步至关重要。由于 $\mathbf{\Sigma}$ 是对角矩阵，上述向量方程实际上等价于 $m$ 个相互独立的标量方程。对于第 $i$ 个分量 ($i = 1, \dots, m$)：
+
+$$
+\bar{y}_i = s_i \bar{x}_i + \bar{z}_i
+$$ {#eq-scalar-decoupling}
+
+这表明，在谱空间中，复杂的逆问题被解耦为 $n$ 个独立的一维问题（对于 $i > m$ 的分量，没有观测值，等价于 $s_i = 0$）。
+
+### 4.3 奇异值的分类讨论
+
+根据奇异值 $s_i$ 的大小，谱空间中的每个模态 (Eigenmode) 可以分为两类。你可以通过下方的交互图来体会 $s_i$ 对观测信息的影响。
+
+1.  **零空间/缺失模态 ($s_i = 0$)**：
+    此时方程变为 $\bar{y}_i = \bar{z}_i$（如果 $i \le m$）或无方程（如果 $i > m$）。这意味着观测数据 $\mathbf{y}$ 不包含任何关于 $\bar{x}_i$ 的信息。恢复 $\bar{x}_i$ 完全依赖于先验知识（扩散模型）。这对应于图像修复中的缺失区域或超分辨率中丢失的高频分量。
+
+2.  **观测模态 ($s_i > 0$)**：
+    此时 $\bar{y}_i$ 提供了关于 $\bar{x}_i$ 的有噪测量：$\bar{y}_i \sim \mathcal{N}(s_i \bar{x}_i, \sigma_y^2)$。我们可以从中提取出关于 $\bar{x}_i$ 的似然信息。然而，不同 $s_i$ 对应的信噪比不同。当 $s_i$ 很小时，观测值中的信号极其微弱，噪声占主导；当 $s_i$ 很大时，观测值非常可靠。
+
+
+
+
+
 
