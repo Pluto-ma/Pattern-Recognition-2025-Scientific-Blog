@@ -289,17 +289,21 @@ $$ {#eq-scalar-decoupling}
 
 在得到观测数据后，首先运行一次 DDRM 扩散反推过程，从后验分布中采样得到一张重建结果。该过程从随机噪声初始化开始，通过多步去噪逐渐恢复图像结构，同时在每一步中强制满足观测一致性约束。作为对照，还计算了简单的线性逆（算子伴随）结果，用于体现扩散模型先验带来的提升。该结果可以视为从后验分布中采样得到的一个可能解，其视觉质量和 PSNR 均明显优于线性重建。
 
-<p align="center">
-  <img src="figures/measurement.png" width="33%" />
-  <img src="figures/ground_truth.png" width="33%" />
-  <img src="figures/ddrm_reconstruction.png" width="33%" />
-</p>
+<div style="display:flex; justify-content:center; gap:10px;">
+  <img src="figures/measurement.png"
+       style="width:30%; height:200px; object-fit:contain;" />
+  <img src="figures/ground_truth.png"
+       style="width:30%; height:200px; object-fit:contain;" />
+  <img src="figures/ddrm_reconstruction.png"
+       style="width:30%; height:200px; object-fit:contain;" />
+</div>
 
 <p align="center">
   (a) Measurement&nbsp;&nbsp;&nbsp;
   (b) Ground truth&nbsp;&nbsp;&nbsp;
   (c) DDRM reconstruction
 </p>
+
 
 
 ### 后验均值与不确定性分析
