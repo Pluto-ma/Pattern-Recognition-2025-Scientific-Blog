@@ -270,6 +270,38 @@ $$ {#eq-scalar-decoupling}
 
  **观测模态 ($s_i > 0$)**：
     此时 $\bar{y}_i$ 提供了关于 $\bar{x}_i$ 的有噪测量：$\bar{y}_i \sim \mathcal{N}(s_i \bar{x}_i, \sigma_y^2)$。我们可以从中提取出关于 $\bar{x}_i$ 的似然信息。然而，不同 $s_i$ 对应的信噪比不同。当 $s_i$ 很小时，观测值中的信号极其微弱，噪声占主导；当 $s_i$ 很大时，观测值非常可靠。
+---
+
+## 数值实验与代码实现
+
+为了验证上述谱空间解耦理论的有效性，我基于 `deepinv` 深度学习库进行了数值实验。实验的主要目标是观察 DDRM 算法如何在**零空间模态**（即 $s_i=0$ 的部分，对应图像缺失区域）利用扩散先验恢复信息。
+
+### 5.1 实验设置：正问题构建
+
+在实验中，我选择了**图像修复（Inpainting）**作为典型的逆问题。根据前文 4.3 节的分类，被遮挡的像素对应奇异值 $s_i=0$ 的情况，此时恢复 $\bar{x}_i$ 完全依赖于扩散模型的先验能力。
+
+代码实现上，我首先定义了物理模型 $A(x)$，模拟随机丢失 50% 像素的退化过程：
+
+```python
+import deepinv as dinv
+import torch
+
+# 1. 数据准备
+# 加载标准测试图像 (Barbara)，并调整为 256x256 分辨率
+url = "https://my-image-url/barbara.png"
+x_true = dinv.utils.load_url_image(url=url, img_size=256)
+
+# 2. 定义正问题算子 (Physics)
+# 对应公式 y = A(x) + n 中的 A，这里设置为随机掩码遮挡
+physics = dinv.physics.Inpainting(
+    mask_rate=0.5, 
+    img_size=(3, 256, 256), 
+    device=dinv.device
+)
+
+# 3. 生成观测数据
+# 这一步模拟了物理成像过程，得到含噪且缺失的 y
+y = physics(x_true)
 
 
 
