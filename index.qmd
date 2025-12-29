@@ -10,11 +10,10 @@ format:
     toc-title: "目录"
     number-sections: true
     code-tools: true
-    title-block-banner: true
+    title-block-banner: false
     smooth-scroll: true
 ---
 
-<!-- ==================== 样式自定义区域 (马卡龙限定版) ==================== -->
 <style>
   /* 1. 定义马卡龙色板 */
   :root {
@@ -46,7 +45,7 @@ format:
     color: #666;
   }
 
-  /* 3. 正文缩进 (保留你的要求) */
+  /* 3. 正文缩进 */
   p {
     text-indent: 2em;
     text-align: justify;
@@ -119,33 +118,27 @@ format:
     margin-bottom: 8px;
     display: block; /* 确保换行 */
   }
-  
-  /* 标题栏背景优化 (覆盖默认 theme) */
-  .quarto-title-banner {
-    background: linear-gradient(to right, #C7CEEA, #B5EAD7) !important;
-    color: #555 !important;
-  }
 </style>
 
-<!-- ==================== 页面内容开始 ==================== -->
-
-<!-- 1. 个人信息卡片 -->
 <div class="student-card">
   <div class="student-icon">🎓</div>
   <div>
-    <div style="font-weight: bold; font-size: 1.1em;">课程作业提交</div>
-    <div style="color: #666;">学号：25113060024 &nbsp;|&nbsp; 姓名：马忠慧</div>
+    <div style="font-weight: bold; font-size: 1.1em; color: black;">课程作业提交</div>
+    <div style="color: black; font-weight: bold; margin-top: 5px;">
+      <span>专业：生物医学工程</span>
+      <span style="margin: 0 8px; font-weight: normal; color: #ccc;">|</span>
+      <span>学号：25113060024</span>
+      <span style="margin: 0 8px; font-weight: normal; color: #ccc;">|</span>
+      <span>姓名：马忠慧</span>
+    </div>
   </div>
 </div>
 
-<!-- 2. 致老师的“求生欲”便签 -->
 <div class="mercy-note">
   <span class="mercy-title">✨ 写在前面的一点碎碎念：</span>
   <p style="text-indent: 0;">
     李老师好！(＞人＜;) <br>
-    虽然我的主修方向不是深度学习，但在这次作业中我已经用尽洪荒之力去理解数学原理和调试代码啦。头发真的掉了好几根... 
-    <br><br>
-    如果文档中还有理解不到位的地方，<strong>Ball ball 老师手下留情！</strong>（内容我可以随时再改！）希望这份基于谱空间视角的报告能让您看到我的努力~ 💖
+    我的研究方向不是深度学习/(ㄒoㄒ)/~~，但在这次作业中我已经用尽洪荒之力去理解数学原理和调试代码啦。如果文档中还有理解不到位的地方，<strong>Ball ball 老师手下留情！</strong> 💖
   </p>
 </div>
 
