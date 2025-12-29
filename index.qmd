@@ -299,10 +299,11 @@ $$ {#eq-scalar-decoupling}
 </div>
 
 <p align="center">
-  (a) Measurement&nbsp;&nbsp;&nbsp;
-  (b) Ground truth&nbsp;&nbsp;&nbsp;
-  (c) DDRM reconstruction
+  <span style="display:inline-block; width:30%;">(a) Measurement</span>
+  <span style="display:inline-block; width:30%;">(b) Ground truth</span>
+  <span style="display:inline-block; width:30%;">(c) DDRM reconstruction</span>
 </p>
+
 
 
 
@@ -324,9 +325,9 @@ $$ {#eq-scalar-decoupling}
 </div>
 
 <p align="center">
-  (d) Posterior mean;&nbsp;
-  (e) Posterior std&nbsp;
-  (f) Absolute error
+  <span style="display:inline-block; width:30%;">(d) Posterior mean</span>
+  <span style="display:inline-block; width:30%;">(e) Posterior std</span>
+  <span style="display:inline-block; width:30%;">(f) Absolute error</span>
 </p>
 
 
