@@ -120,6 +120,7 @@ format:
   }
 </style>
 
+```{=html}
 <div class="student-card">
   <div class="student-icon">🎓</div>
   <div>
@@ -133,6 +134,7 @@ format:
     </div>
   </div>
 </div>
+```
 
 <div class="mercy-note">
   <span class="mercy-title">✨ 写在前面的一点碎碎念：</span>
