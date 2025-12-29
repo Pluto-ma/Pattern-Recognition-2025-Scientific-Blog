@@ -1,7 +1,5 @@
 ---
-title: "基于 DDRM 的图像重建"
-subtitle: "谱空间视角下的贝叶斯逆问题初探"
-author: "马忠慧 (学号：25113060024)"
+title: "基于 DDRM 的图像重建--谱空间视角下的贝叶斯逆问题"
 date: last-modified
 format:
   html:
@@ -137,10 +135,10 @@ format:
 ```
 
 <div class="mercy-note">
-  <span class="mercy-title">✨ 写在前面的一点碎碎念：</span>
+  <span class="mercy-title">✨ 碎碎念：</span>
   <p style="text-indent: 0;">
     李老师好！(＞人＜;) <br>
-    我的研究方向不是深度学习/(ㄒoㄒ)/~~，但在这次作业中我已经用尽洪荒之力去理解数学原理和调试代码啦。如果文档中还有理解不到位的地方，<strong>Ball ball 老师手下留情！</strong> 💖
+    我的研究方向不是深度学习/(ㄒoㄒ)，但在这次作业中我已经用尽洪荒之力去理解数学原理、调试代码和制作博客网页啦。如果文档中还有理解不到位的地方，<strong>Ball ball 老师手下留情！</strong> 💖
   </p>
 </div>
 
