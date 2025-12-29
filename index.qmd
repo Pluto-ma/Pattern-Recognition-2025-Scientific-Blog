@@ -314,16 +314,21 @@ $$ {#eq-scalar-decoupling}
 
 在实验中，由于真实图像是已知的，还可以计算后验均值与 ground truth 之间的绝对误差图，用于定量分析重建性能。需要注意的是，该误差图仅用于实验评估，在真实应用场景中通常无法获得。
 
+<div style="display:flex; justify-content:center; gap:10px;">
+  <img src="figures/posterior_mean.png"
+       style="width:30%; height:200px; object-fit:contain;" />
+  <img src="figures/posterior_std.png"
+       style="width:30%; height:200px; object-fit:contain;" />
+  <img src="figures/absolute_error.png"
+       style="width:30%; height:200px; object-fit:contain;" />
+</div>
+
 <p align="center">
-  <img src="figures/posterior_mean.png" width="33%" />
-  <img src="figures/posterior_std.png" width="33%" />
-  <img src="figures/absolute_error.png" width="33%" />
-</p>
-<p align="center">
-  (d) Posterior mean&nbsp;&nbsp;&nbsp;
-  (e) Posterior std&nbsp;&nbsp;&nbsp;
+  (d) Posterior mean;&nbsp;
+  (e) Posterior std&nbsp;
   (f) Absolute error
 </p>
+
 
 
 ##总结
